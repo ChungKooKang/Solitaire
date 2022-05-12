@@ -1,14 +1,12 @@
 #include <Windows.h>
 #include <gdiplus.h>
-
-#include <list>
-#include "Card.h"
+#include "Game.h"
 
 #pragma comment (lib, "Gdiplus.lib")
 
 const wchar_t gClassName[] = L"MyWindowClass";
 
-std::list<solitaire::Card> myCards;
+solitaire::Game myGame;
 
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -23,10 +21,6 @@ int WINAPI WinMain(
 	Gdiplus::GdiplusStartupInput gdiplusStartupInput;
 	ULONG_PTR gdiplusToken;
 	Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, nullptr);
-
-	myCards.push_back(solitaire::Card(solitaire::Type::Wolf, 0, 0));
-	myCards.push_back(solitaire::Card(solitaire::Type::Bear, 120, 0));
-	myCards.push_back(solitaire::Card(solitaire::Type::Dragon, 240, 0));
 
 
 	HWND hwnd;
@@ -67,6 +61,8 @@ int WINAPI WinMain(
 		MessageBox(NULL, L"Failed To Create Window!", L"Error", MB_OK);
 		return 0;
 	}
+	myGame.Init(hwnd);
+
 	ShowWindow(hwnd, nShowCmd);
 	UpdateWindow(hwnd);
 	
@@ -78,8 +74,7 @@ int WINAPI WinMain(
 
 	}
 	
-	myCards.clear();
-
+	myGame.Release();
 
 	Gdiplus::GdiplusShutdown(gdiplusToken);
 	return static_cast<int>(msg.wParam);
@@ -93,12 +88,8 @@ void OnPaint(HWND hwnd)
 	hdc = BeginPaint(hwnd, &ps);
 
 	Gdiplus::Graphics graphics(hdc);
-	// TODO : DRAW
-	for (auto& card : myCards)
-	{
-		card.Flip(true);
-		card.Draw(graphics);
-	}
+
+	myGame.Draw(graphics);
 
 	EndPaint(hwnd, &ps);
 }
@@ -107,6 +98,10 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
 {
 	switch (message)
 	{
+	case WM_LBUTTONUP :
+		myGame.OnClick(LOWORD(lParam), HIWORD(wParam));
+		break;
+
 	case WM_PAINT :
 		OnPaint(hwnd);
 		break;

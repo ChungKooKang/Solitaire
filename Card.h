@@ -18,20 +18,25 @@ namespace solitaire
 		std::unique_ptr<Gdiplus::Image> mBack;
 		std::unique_ptr<Gdiplus::Image> mFront;
 
+		HWND mHwnd;
 		int mX;
 		int mY;
 		bool mIsFront;
 		Type mType;
 
 	protected :
-		Card() {}
+		Card() : mBack{} , mFront{},
+			mHwnd(), mX{}, mY{},
+			mIsFront{}, mType{}
+		{}
 
 	public :
-		Card(Type type, int x, int y);
+		Card(HWND hwnd,Type type, int x, int y);
 
 		bool CheckClicked(int mouseX, int mouseY);
 		void Flip(bool isFront);
 		void Draw(Gdiplus::Graphics& graphics);
+		void Invalidate();
 	};
 
 }

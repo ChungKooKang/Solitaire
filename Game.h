@@ -14,13 +14,14 @@ namespace solitaire
 	private :
 		std::unique_ptr<Gdiplus::Image> mBackground;
 		std::list<Card> mDeck;
-		int mFlipCount;
+		int mFlipCount{};
+		HWND mHwnd{};
 
 	public :
-		void Init();
+		void Init(HWND hwnd);
 		void Release();
 
-		void Draw(Gdiplus::Graphics& gaphics);
+		void Draw(Gdiplus::Graphics& graphics);
 		void OnClick(int mouseX, int mouseY);
 
 	private :
