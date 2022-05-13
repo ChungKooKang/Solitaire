@@ -1,4 +1,6 @@
 #include <string>
+#include <vector>
+#include <random>
 #include "Game.h"
 
 namespace solitaire
@@ -47,22 +49,100 @@ namespace solitaire
 
 	void Game::OnClick(int mouseX, int mouseY)
 	{
+		Card* pCard{};
 		for (auto& card : mDeck)
 		{
 			if (card.CheckClicked(mouseX, mouseY))
 			{
-				//TODO : 클릭처리
+				pCard = &card;
+				break;
 			}
+		}
+
+		if (pCard)
+		{
+			mFlipCount++;
+			RECT rct{
+				static_cast<LONG>(mCountRect.GetLeft()),
+				static_cast<LONG>(mCountRect.GetTop()),
+				static_cast<LONG>(mCountRect.GetRight()),
+				static_cast<LONG>(mCountRect.GetBottom())
+			};
+
+			InvalidateRect(mHwnd, &rct, false);
+
+			if (mpSelectedCard == nullptr)
+			{
+				mpSelectedCard = pCard;
+			}
+			else
+			{
+				if (pCard->GetType() == mpSelectedCard->GetType())
+				{
+					mpSelectedCard->Invalidate();
+					mDeck.remove_if([&](Card& card) {
+						return (card.GetIndex() == pCard->GetIndex() || card.GetIndex() == mpSelectedCard->GetIndex());
+						}
+					);
+					mpSelectedCard = nullptr;
+				}
+				else
+				{
+					UpdateWindow(mHwnd);
+					Sleep(500);
+					pCard->Flip(false);
+					mpSelectedCard->Flip(false);
+
+					mpSelectedCard = nullptr;
+				}
+			}
+
 		}
 	}
 
 	void Game::CreateCards()
 	{
-		//TODO : 카드 섞기
+		std::vector<Type> types;
+		while (types.size() < static_cast<size_t>(BOARD_COLUMN * BOARD_ROW))
+		{
+			int temp = types.size() % 6;
+			switch (temp)
+			{
+			case 0 :
+				types.push_back(Type::Bear);
+				types.push_back(Type::Bear);
+				break;
 
-		mDeck.push_back(Card(mHwnd, Type::Bear, 0, 0));
-		mDeck.push_back(Card(mHwnd, Type::Wolf, 120, 0));
-		mDeck.push_back(Card(mHwnd, Type::Dragon, 240, 0));
+			case 2  :
+				types.push_back(Type::Wolf);
+				types.push_back(Type::Wolf);
+				break;
+
+			case 4 :
+				types.push_back(Type::Dragon);
+				types.push_back(Type::Dragon);
+				break;
+			}
+		}
+
+		std::random_device rd;
+		std::mt19937 gen(rd());
+		std::shuffle(types.begin(), types.end(), gen);
+
+		int index{};
+		int posX{ 15 }, posY{ 10 };
+		for (int x = 0; x < BOARD_COLUMN; ++x)
+		{
+			posY = { 10 };
+
+			for (int y = 0; y < BOARD_ROW; ++y)
+			{
+				mDeck.push_back(Card(mHwnd, index, types[index++], posX, posY));
+
+				posY += 140 + 10;
+			}
+			posX += 100 + 10;
+		}
 	}
 
 }

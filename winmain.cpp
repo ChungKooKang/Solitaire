@@ -41,13 +41,13 @@ int WINAPI WinMain(
 		return 0;
 	}
 	RECT wr = { 0, 0, 1024, 768 };
-	AdjustWindowRect(&wr, WS_OVERLAPPEDWINDOW, FALSE);
+	AdjustWindowRect(&wr, WS_OVERLAPPED | WS_SYSMENU, FALSE);
 
 	hwnd = CreateWindowEx(
 		NULL,
 		gClassName,
 		L"Solitaire Game",
-		WS_OVERLAPPEDWINDOW,
+		WS_OVERLAPPED | WS_SYSMENU,
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		wr.right - wr.left,
 		wr.bottom - wr.top,
@@ -99,7 +99,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
 	switch (message)
 	{
 	case WM_LBUTTONUP :
-		myGame.OnClick(LOWORD(lParam), HIWORD(wParam));
+		myGame.OnClick(LOWORD(lParam), HIWORD(lParam));
 		break;
 
 	case WM_PAINT :
